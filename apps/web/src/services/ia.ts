@@ -1,8 +1,11 @@
+const BASE_URL = import.meta.env.VITE_API_URL ?? "";
+
 export const askIA = async (
   userMessage: string,
   characterPrompt?: string
 ) => {
-  const res = await fetch("/api/chat", {
+  const url = BASE_URL ? `${BASE_URL}/chat` : "/api/chat";
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
