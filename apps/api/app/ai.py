@@ -1,15 +1,15 @@
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
+from groq import Groq
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
 def ask_ai(user_message: str, character_prompt: str) -> str:
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="llama-3.3-70b-versatile",
         messages=[
             {"role": "system", "content": character_prompt},
             {"role": "user", "content": user_message},
