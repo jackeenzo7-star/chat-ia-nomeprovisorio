@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import MessageBubble from "../components/MessageBubble";
 import ChatInput from "../components/ChatInput";
+import { askIA } from "../services/ia";
 
 interface Message {
   id: string;
@@ -14,14 +15,35 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([
     { id: "1", text: "Olá! Como você está?", fromUser: false },
   ]);
+  const [loading, setLoading] = useState(false);
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     const userMsg: Message = {
       id: Date.now().toString(),
       text,
       fromUser: true,
     };
     setMessages((prev) => [...prev, userMsg]);
+    setLoading(true);
+
+    try {
+      const data = await askIA(text);
+      const iaMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: data.response,
+        fromUser: false,
+      };
+      setMessages((prev) => [...prev, iaMsg]);
+    } catch {
+      const errMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Erro ao conectar com a IA.",
+        fromUser: false,
+      };
+      setMessages((prev) => [...prev, errMsg]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,6 +75,13 @@ export default function Chat() {
           {messages.map((msg) => (
             <MessageBubble key={msg.id} {...msg} />
           ))}
+          {loading && (
+            <div className="flex justify-start my-1">
+              <div className="bg-white rounded-2xl p-3 shadow-sm">
+                <p className="text-gray-500 text-sm">digitando...</p>
+              </div>
+            </div>
+          )}
         </section>
         <ChatInput onSend={handleSend} />
       </main>
