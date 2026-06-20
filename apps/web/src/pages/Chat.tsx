@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import MessageBubble from "../components/MessageBubble";
 import ChatInput from "../components/ChatInput";
 import { askIA } from "../services/ia";
-import { listBots } from "../services/bots";
+import { getBot, listBots } from "../services/bots";
 import { buildPrompt } from "../types/bot";
 import type { Bot } from "../types/bot";
 import type { Message } from "../types/chat";
@@ -16,29 +16,46 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    listBots().then((all) => {
-      setBots(all);
-      const found = all.find((b) => b.id === id);
-      setBot(found || null);
+    if (!id) return;
+    getBot(id).then((found) => {
+      setBot(found);
       if (found) {
-        setMessages([{ id: "0", text: found.initial_greeting, fromUser: false }]);
+        setMessages([
+          { id: "0", text: found.initial_greeting, fromUser: false },
+        ]);
       }
     });
+    listBots().then(setBots);
   }, [id]);
 
   const handleSend = async (text: string) => {
     if (!bot) return;
-    const userMsg: Message = { id: Date.now().toString(), text, fromUser: true };
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      text,
+      fromUser: true,
+    };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
 
     try {
       const data = await askIA(text, buildPrompt(bot));
-      const iaMsg: Message = { id: (Date.now() + 1).toString(), text: data.response, fromUser: false };
+      const iaMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: data.response,
+        fromUser: false,
+      };
       setMessages((prev) => [...prev, iaMsg]);
     } catch (e) {
-      console.error("Erro completo:", e);
-      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), text: "Erro ao conectar com a IA.", fromUser: false }]);
+      console.error("Erro:", e);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          text: "Erro ao conectar com a IA.",
+          fromUser: false,
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -50,14 +67,25 @@ export default function Chat() {
         <div className="p-4 text-lg font-semibold border-b">Bots</div>
         <ul className="divide-y flex-1 overflow-y-auto">
           {bots.map((b) => (
-            <li key={b.id} className={`hover:bg-gray-50 cursor-pointer ${b.id === id ? "bg-gray-100" : ""}`}>
+            <li
+              key={b.id}
+              className={`hover:bg-gray-50 cursor-pointer ${
+                b.id === id ? "bg-gray-100" : ""
+              }`}
+            >
               <Link to={`/chat/${b.id}`} className="flex items-center p-4">
                 <div className="w-10 h-10 rounded-full bg-green-600 mr-3 flex items-center justify-center text-white font-bold">
                   {b.name[0]}
                 </div>
                 <div>
                   <p className="font-medium">{b.name}</p>
-                  <p className="text-sm text-gray-500 truncate">{b.tone === "friendly" ? "Amigável" : b.tone === "serious" ? "Sério" : "Engraçado"}</p>
+                  <p className="text-sm text-gray-500 truncate">
+                    {b.tone === "friendly"
+                      ? "Amigável"
+                      : b.tone === "serious"
+                      ? "Sério"
+                      : "Engraçado"}
+                  </p>
                 </div>
               </Link>
             </li>
@@ -66,7 +94,9 @@ export default function Chat() {
       </aside>
       <main className="flex-1 flex flex-col">
         <header className="p-4 bg-[#075E54] text-white flex items-center gap-3">
-          <Link to="/" className="text-white text-lg">&#8592;</Link>
+          <Link to="/" className="text-white text-lg">
+            &#8592;
+          </Link>
           {bot && (
             <>
               <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold">
@@ -74,7 +104,13 @@ export default function Chat() {
               </div>
               <div>
                 <h1 className="text-lg font-semibold">{bot.name}</h1>
-                <p className="text-xs text-green-200">{bot.tone === "friendly" ? "Amigável" : bot.tone === "serious" ? "Sério" : "Engraçado"}</p>
+                <p className="text-xs text-green-200">
+                  {bot.tone === "friendly"
+                    ? "Amigável"
+                    : bot.tone === "serious"
+                    ? "Sério"
+                    : "Engraçado"}
+                </p>
               </div>
             </>
           )}

@@ -1,6 +1,15 @@
 import { supabase } from "../lib/supabase";
 import type { Bot } from "../types/bot";
 
+export async function getBot(id: string): Promise<Bot | null> {
+  const { data } = await supabase
+    .from("bots")
+    .select("*")
+    .eq("id", id)
+    .single();
+  return data;
+}
+
 export async function listBots(): Promise<Bot[]> {
   const { data } = await supabase
     .from("bots")
