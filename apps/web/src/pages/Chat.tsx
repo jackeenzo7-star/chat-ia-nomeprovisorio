@@ -21,7 +21,7 @@ export default function Chat() {
       const found = all.find((b) => b.id === id);
       setBot(found || null);
       if (found) {
-        setMessages([{ id: "0", text: `Olá! Sou ${found.name}. Como posso ajudar?`, fromUser: false }]);
+        setMessages([{ id: "0", text: found.initial_greeting, fromUser: false }]);
       }
     });
   }, [id]);
@@ -57,7 +57,7 @@ export default function Chat() {
                 </div>
                 <div>
                   <p className="font-medium">{b.name}</p>
-                  <p className="text-sm text-gray-500 truncate">{b.personality || ""}</p>
+                  <p className="text-sm text-gray-500 truncate">{b.tone === "friendly" ? "Amigável" : b.tone === "serious" ? "Sério" : "Engraçado"}</p>
                 </div>
               </Link>
             </li>
@@ -74,7 +74,7 @@ export default function Chat() {
               </div>
               <div>
                 <h1 className="text-lg font-semibold">{bot.name}</h1>
-                <p className="text-xs text-green-200">{bot.relationship || "online"}</p>
+                <p className="text-xs text-green-200">{bot.tone === "friendly" ? "Amigável" : bot.tone === "serious" ? "Sério" : "Engraçado"}</p>
               </div>
             </>
           )}
