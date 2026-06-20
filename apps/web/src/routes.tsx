@@ -4,6 +4,7 @@ import { supabase } from "./lib/supabase";
 import Home from "./pages/Home";
 import Chat from "./pages/Chat";
 import Auth from "./pages/Auth";
+import BotCreate from "./pages/BotCreate";
 
 function AppRoutesContent() {
   const [session, setSession] = useState<boolean | null>(null);
@@ -43,6 +44,10 @@ function AppRoutesContent() {
       <Route
         path="/chat/:id"
         element={session ? <Chat /> : <Navigate to="/auth" replace />}
+      />
+      <Route
+        path="/bots/new"
+        element={session ? <BotCreate /> : <Navigate to="/auth" replace />}
       />
     </Routes>
   );

@@ -1,40 +1,59 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { ping } from "../services/api";
+import { Link, useNavigate } from "react-router-dom";
+import { listBots } from "../services/bots";
+import { supabase } from "../lib/supabase";
+import type { Bot } from "../types/bot";
 
 export default function Home() {
-  const [apiStatus, setApiStatus] = useState("...");
+  const navigate = useNavigate();
+  const [bots, setBots] = useState<Bot[]>([]);
+  const [user, setUser] = useState<string>("");
 
   useEffect(() => {
-    ping().then((d) => setApiStatus(d.msg)).catch(() => setApiStatus("offline"));
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user?.email || "");
+    });
+    listBots().then(setBots);
   }, []);
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <aside className="w-1/3 border-r border-gray-300 bg-white">
+      <aside className="w-1/3 border-r border-gray-300 bg-white flex flex-col">
         <div className="p-4 text-lg font-semibold border-b flex justify-between items-center">
-          Conversas
-          <span className="text-xs text-gray-400">API: {apiStatus}</span>
+          <span>Bots</span>
+          <span className="text-xs text-gray-400">{user}</span>
         </div>
-        <ul className="divide-y">
-          <li className="p-4 hover:bg-gray-50 cursor-pointer">
-            <Link to="/chat/1" className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-green-600 mr-3" />
-              <div>
-                <p className="font-medium">Chat de teste</p>
-                <p className="text-sm text-gray-500">Última mensagem...</p>
-              </div>
-            </Link>
-          </li>
+        <div className="p-3 border-b">
+          <button
+            onClick={() => navigate("/bots/new")}
+            className="w-full bg-[#075E54] text-white p-2 rounded-lg text-sm font-semibold hover:bg-[#054d44]"
+          >
+            + Novo Bot
+          </button>
+        </div>
+        <ul className="divide-y flex-1 overflow-y-auto">
+          {bots.map((bot) => (
+            <li key={bot.id} className="hover:bg-gray-50 cursor-pointer">
+              <Link to={`/chat/${bot.id}`} className="flex items-center p-4">
+                <div className="w-10 h-10 rounded-full bg-green-600 mr-3 flex items-center justify-center text-white font-bold">
+                  {bot.name[0]}
+                </div>
+                <div>
+                  <p className="font-medium">{bot.name}</p>
+                  <p className="text-sm text-gray-500 truncate">{bot.personality || "Sem personalidade definida"}</p>
+                </div>
+              </Link>
+            </li>
+          ))}
+          {bots.length === 0 && (
+            <li className="p-6 text-center text-gray-400 text-sm">
+              Nenhum bot ainda. Crie um!
+            </li>
+          )}
         </ul>
       </aside>
-      <main className="flex-1 flex flex-col">
-        <header className="p-4 bg-[#075E54] text-white flex items-center">
-          <h1 className="text-xl font-semibold">Selecione uma conversa</h1>
-        </header>
-        <section className="flex-1 flex items-center justify-center text-gray-500">
-          <p>Escolha ou crie uma nova conversa</p>
-        </section>
+      <main className="flex-1 flex flex-col items-center justify-center bg-[#ECE5DD] text-gray-500">
+        <p className="text-lg">Selecione ou crie um bot para começar</p>
       </main>
     </div>
   );
