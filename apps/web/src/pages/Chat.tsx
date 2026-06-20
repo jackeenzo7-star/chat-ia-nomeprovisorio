@@ -34,7 +34,8 @@ export default function Chat() {
         fromUser: false,
       };
       setMessages((prev) => [...prev, iaMsg]);
-    } catch {
+    } catch (e) {
+      console.error("Erro completo:", e);
       const errMsg: Message = {
         id: (Date.now() + 1).toString(),
         text: "Erro ao conectar com a IA.",

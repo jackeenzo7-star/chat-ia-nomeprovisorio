@@ -10,6 +10,10 @@ export const askIA = async (
       character_prompt: characterPrompt,
     }),
   });
-  if (!res.ok) throw new Error("Erro ao chamar IA");
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("Resposta do servidor:", res.status, text);
+    throw new Error(`Erro ${res.status}: ${text}`);
+  }
   return res.json();
 };
