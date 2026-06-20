@@ -1,10 +1,21 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ping } from "../services/api";
 
 export default function Home() {
+  const [apiStatus, setApiStatus] = useState("...");
+
+  useEffect(() => {
+    ping().then((d) => setApiStatus(d.msg)).catch(() => setApiStatus("offline"));
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-100">
       <aside className="w-1/3 border-r border-gray-300 bg-white">
-        <div className="p-4 text-lg font-semibold border-b">Conversas</div>
+        <div className="p-4 text-lg font-semibold border-b flex justify-between items-center">
+          Conversas
+          <span className="text-xs text-gray-400">API: {apiStatus}</span>
+        </div>
         <ul className="divide-y">
           <li className="p-4 hover:bg-gray-50 cursor-pointer">
             <Link to="/chat/1" className="flex items-center">
