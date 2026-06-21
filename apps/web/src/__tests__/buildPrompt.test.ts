@@ -7,8 +7,8 @@ const base: Bot = {
   name: "Teste",
   gender: "neutro",
   backstory: "",
-  language_style: "informal",
-  tone: "friendly",
+  language_style: "calmo e paciente",
+  tone: "amigável e acolhedor",
   initial_greeting: "Oi!",
   created_at: "",
   updated_at: "",
@@ -19,16 +19,12 @@ describe("buildPrompt", () => {
     expect(buildPrompt(base)).toContain("Você é Teste");
   });
 
-  it("inclui o tom amigável", () => {
-    expect(buildPrompt(base)).toContain("Tom: amigável");
+  it("inclui o tom como texto livre", () => {
+    expect(buildPrompt(base)).toContain("Tom: amigável e acolhedor");
   });
 
-  it("inclui o tom sério", () => {
-    expect(buildPrompt({ ...base, tone: "serious" })).toContain("Tom: sério");
-  });
-
-  it("inclui estilo formal quando language_style=formal", () => {
-    expect(buildPrompt({ ...base, language_style: "formal" })).toContain("formal");
+  it("inclui o estilo como texto livre", () => {
+    expect(buildPrompt({ ...base, language_style: "formal e direto" })).toContain("Estilo de linguagem: formal e direto");
   });
 
   it("inclui backstory quando fornecida", () => {
@@ -39,5 +35,15 @@ describe("buildPrompt", () => {
   it("não inclui backstory vazia", () => {
     const r = buildPrompt(base);
     expect(r).not.toContain("História:");
+  });
+
+  it("não inclui tom vazio", () => {
+    const r = buildPrompt({ ...base, tone: "" });
+    expect(r).not.toContain("Tom:");
+  });
+
+  it("não inclui estilo vazio", () => {
+    const r = buildPrompt({ ...base, language_style: "" });
+    expect(r).not.toContain("Estilo de linguagem:");
   });
 });

@@ -10,18 +10,6 @@ const emoji: Record<string, string> = {
   feminino: "\u{1F469}",
 };
 
-const toneColor: Record<string, string> = {
-  friendly: "bg-green-100 text-green-800",
-  serious: "bg-blue-100 text-blue-800",
-  funny: "bg-yellow-100 text-yellow-800",
-};
-
-const toneLabel: Record<string, string> = {
-  friendly: "Amigável",
-  serious: "Sério",
-  funny: "Engraçado",
-};
-
 export default function BotPreview({ bot }: Props) {
   return (
     <div className="bg-gray-50 border rounded-xl p-4 space-y-3">
@@ -29,13 +17,17 @@ export default function BotPreview({ bot }: Props) {
         <span className="text-4xl">{emoji[bot.gender] || "\u{1F9D0}"}</span>
         <div>
           <p className="font-bold text-lg text-gray-800">{bot.name || "Nome do Bot"}</p>
-          <div className="flex gap-2 mt-1">
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${toneColor[bot.tone] || "bg-gray-100"}`}>
-              {toneLabel[bot.tone] || bot.tone}
-            </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 font-medium">
-              {bot.language_style === "formal" ? "Formal" : "Informal"}
-            </span>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {bot.tone && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-800 max-w-[200px] truncate" title={bot.tone}>
+                {bot.tone.slice(0, 40)}{bot.tone.length > 40 ? "..." : ""}
+              </span>
+            )}
+            {bot.language_style && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 max-w-[200px] truncate" title={bot.language_style}>
+                {bot.language_style.slice(0, 40)}{bot.language_style.length > 40 ? "..." : ""}
+              </span>
+            )}
           </div>
         </div>
       </div>

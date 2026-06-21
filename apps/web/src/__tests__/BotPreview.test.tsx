@@ -6,8 +6,8 @@ const bot = {
   name: "TestBot",
   gender: "masculino",
   backstory: "Veio do futuro.",
-  language_style: "informal" as const,
-  tone: "funny" as const,
+  language_style: "paciente e didático",
+  tone: "bem-humorado e leve",
   initial_greeting: "E aí!",
 };
 
@@ -22,9 +22,9 @@ describe("BotPreview", () => {
     expect(screen.getByText("Veio do futuro.")).toBeTruthy();
   });
 
-  it("exibe o tom engraçado", () => {
+  it("exibe o tom como texto livre", () => {
     render(<BotPreview bot={bot} />);
-    expect(screen.getByText("Engraçado")).toBeTruthy();
+    expect(screen.getByText("bem-humorado e leve")).toBeTruthy();
   });
 
   it("exibe a saudação em bolha de chat", () => {

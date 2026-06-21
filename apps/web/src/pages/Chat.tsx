@@ -90,11 +90,7 @@ export default function Chat() {
                 <div>
                   <p className="font-medium">{b.name}</p>
                   <p className="text-sm text-gray-500 truncate">
-                    {b.tone === "friendly"
-                      ? "Amigável"
-                      : b.tone === "serious"
-                      ? "Sério"
-                      : "Engraçado"}
+                    {b.tone || "Sem tom definido"}
                   </p>
                 </div>
               </Link>
@@ -117,11 +113,7 @@ export default function Chat() {
               <div className="min-w-0">
                 <h1 className="text-lg font-semibold truncate">{bot.name}</h1>
                 <p className="text-xs text-green-200">
-                  {bot.tone === "friendly"
-                    ? "Amigável"
-                    : bot.tone === "serious"
-                    ? "Sério"
-                    : "Engraçado"}
+                  {bot.tone || "Sem tom definido"}
                 </p>
               </div>
             </>

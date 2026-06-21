@@ -40,7 +40,7 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="font-medium">{bot.name}</p>
-                  <p className="text-sm text-gray-500 truncate">{bot.tone === "friendly" ? "Amigável" : bot.tone === "serious" ? "Sério" : "Engraçado"}</p>
+                  <p className="text-sm text-gray-500 truncate">{bot.tone || "Sem tom definido"}</p>
                 </div>
               </Link>
             </li>

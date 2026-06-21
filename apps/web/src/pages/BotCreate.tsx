@@ -4,6 +4,8 @@ import { createBot, listBots } from "../services/bots";
 import BotPreview from "../components/BotPreview";
 import type { Bot } from "../types/bot";
 
+const MIN = { TONE: 200, STYLE: 5000, STORY: 10000 } as const;
+
 const tip = (text: string) => ({ title: text });
 
 function validate(form: typeof defaultForm, existingNames: string[]): Record<string, string> {
@@ -12,6 +14,9 @@ function validate(form: typeof defaultForm, existingNames: string[]): Record<str
   else if (form.name.trim().length < 2) errors.name = "O nome deve ter pelo menos 2 caracteres.";
   else if (existingNames.includes(form.name.trim().toLowerCase())) errors.name = "Já existe um bot com este nome.";
   if (!form.initial_greeting.trim()) errors.initial_greeting = "A saudação inicial é obrigatória.";
+  if (form.tone.trim().length < MIN.TONE) errors.tone = `O tom deve ter pelo menos ${MIN.TONE} caracteres (${form.tone.trim().length}/${MIN.TONE}).`;
+  if (form.language_style.trim().length < MIN.STYLE) errors.language_style = `O estilo deve ter pelo menos ${MIN.STYLE} caracteres (${form.language_style.trim().length}/${MIN.STYLE}).`;
+  if (form.backstory.trim().length < MIN.STORY) errors.backstory = `A história deve ter pelo menos ${MIN.STORY} caracteres (${form.backstory.trim().length}/${MIN.STORY}).`;
   return errors;
 }
 
@@ -19,8 +24,8 @@ const defaultForm = {
   name: "",
   gender: "neutro",
   backstory: "",
-  language_style: "informal" as const,
-  tone: "friendly" as const,
+  language_style: "",
+  tone: "",
   initial_greeting: "Olá! Como posso ajudar?",
 };
 
@@ -101,31 +106,48 @@ export default function BotCreate() {
             </div>
 
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Tom emocional das respostas")}>Tom</label>
-              <select value={form.tone} onChange={set("tone")} className={inputClass("tone")}>
-                <option value="friendly">Amigável</option>
-                <option value="serious">Sério</option>
-                <option value="funny">Engraçado</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Nível de formalidade da linguagem")}>Estilo</label>
-              <select value={form.language_style} onChange={set("language_style")} className={inputClass("language_style")}>
-                <option value="informal">Informal</option>
-                <option value="formal">Formal</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("História de fundo que define a personalidade do bot")}>História</label>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" {...tip("Tom da comunicação do bot")}>
+                <span>Tom {form.tone.trim().length >= MIN.TONE ? "✅" : `(${form.tone.trim().length}/${MIN.TONE})`}</span>
+                <span className={form.tone.trim().length >= MIN.TONE ? "text-green-500" : "text-red-400"}>{MIN.TONE} mín.</span>
+              </label>
               <textarea
-                placeholder="Ex: Nasci em uma cidade pequena e sempre gostei de ajudar pessoas..."
+                placeholder="Descreva como o bot deve se expressar (ex: caloroso, direto, poético...)"
+                value={form.tone}
+                onChange={set("tone")}
+                className={inputClass("tone")}
+                rows={4}
+              />
+              {errors.tone && <p className="text-red-500 text-xs mt-1">{errors.tone}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" {...tip("Estilo de comportamento do bot")}>
+                <span>Estilo {form.language_style.trim().length >= MIN.STYLE ? "✅" : `(${form.language_style.trim().length}/${MIN.STYLE})`}</span>
+                <span className={form.language_style.trim().length >= MIN.STYLE ? "text-green-500" : "text-red-400"}>{MIN.STYLE} mín.</span>
+              </label>
+              <textarea
+                placeholder="Descreva o estilo comportamental do bot (ex: paciente, didático, provocador...)"
+                value={form.language_style}
+                onChange={set("language_style")}
+                className={inputClass("language_style")}
+                rows={6}
+              />
+              {errors.language_style && <p className="text-red-500 text-xs mt-1">{errors.language_style}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" {...tip("História de fundo que define a personalidade do bot")}>
+                <span>História {form.backstory.trim().length >= MIN.STORY ? "✅" : `(${form.backstory.trim().length}/${MIN.STORY})`}</span>
+                <span className={form.backstory.trim().length >= MIN.STORY ? "text-green-500" : "text-red-400"}>{MIN.STORY} mín.</span>
+              </label>
+              <textarea
+                placeholder="Conte a história do bot: origem, experiências, personalidade..."
                 value={form.backstory}
                 onChange={set("backstory")}
                 className={inputClass("backstory")}
-                rows={3}
+                rows={8}
               />
+              {errors.backstory && <p className="text-red-500 text-xs mt-1">{errors.backstory}</p>}
             </div>
 
             <div>
