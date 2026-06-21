@@ -6,21 +6,39 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [success, setSuccess] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
+    if (mode === "signup") {
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess("Conta criada! Verifique seu email para confirmar.");
+      }
       setLoading(false);
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      }
     }
+  };
+
+  const toggleMode = () => {
+    setMode(mode === "login" ? "signup" : "login");
+    setError("");
+    setSuccess("");
   };
 
   const handleGoogleLogin = async () => {
@@ -34,14 +52,18 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
         <h1 className="text-2xl font-bold text-center mb-6 text-[#075E54]">
-          Entrar
+          {mode === "login" ? "Entrar" : "Criar Conta"}
         </h1>
 
         {error && (
           <p className="text-red-500 text-sm text-center mb-4">{error}</p>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        {success && (
+          <p className="text-green-600 text-sm text-center mb-4">{success}</p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
             placeholder="Email"
@@ -63,9 +85,19 @@ export default function Auth() {
             disabled={loading}
             className="w-full bg-[#075E54] text-white p-3 rounded-lg font-semibold hover:bg-[#054d44] disabled:opacity-50"
           >
-            {loading ? "Entrando..." : "Entrar"}
+            {loading
+              ? (mode === "login" ? "Entrando..." : "Criando conta...")
+              : (mode === "login" ? "Entrar" : "Criar Conta")}
           </button>
         </form>
+
+        <p className="text-sm text-center mt-4 text-gray-500">
+          {mode === "login" ? (
+            <>Não tem conta?{" "}<button type="button" onClick={toggleMode} className="text-[#075E54] font-semibold hover:underline">Criar Conta</button></>
+          ) : (
+            <>Já tem conta?{" "}<button type="button" onClick={toggleMode} className="text-[#075E54] font-semibold hover:underline">Entrar</button></>
+          )}
+        </p>
 
         <div className="my-4 flex items-center gap-2">
           <hr className="flex-1" />
