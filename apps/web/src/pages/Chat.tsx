@@ -77,24 +77,24 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <aside className="hidden md:flex w-1/3 border-r border-gray-300 bg-white flex flex-col">
-        <div className="p-4 text-lg font-semibold border-b">Bots</div>
-        <ul className="divide-y flex-1 overflow-y-auto">
+    <div className="flex h-screen bg-[#ECE5DD]">
+      <aside className="hidden md:flex w-1/3 border-r border-gray-300 bg-white flex-col">
+        <div className="p-4 bg-[#075E54] text-white font-semibold text-lg">Bots</div>
+        <ul className="flex-1 overflow-y-auto bg-white">
           {bots.map((b) => (
             <li
               key={b.id}
-              className={`hover:bg-gray-50 cursor-pointer ${
+              className={`hover:bg-gray-100 cursor-pointer transition-colors ${
                 b.id === id ? "bg-gray-100" : ""
               }`}
             >
-              <Link to={`/chat/${b.id}`} className="flex items-center p-4">
-                <div className="w-10 h-10 rounded-full bg-green-600 mr-3 flex items-center justify-center text-white font-bold">
+              <Link to={`/chat/${b.id}`} className="flex items-center p-3.5 gap-3">
+                <div className="w-12 h-12 rounded-full bg-[#075E54] flex items-center justify-center text-white font-bold text-lg shrink-0">
                   {b.name[0]}
                 </div>
-                <div>
-                  <p className="font-medium">{b.name}</p>
-                  <p className="text-sm text-gray-500 truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-gray-800 truncate">{b.name}</p>
+                  <p className="text-sm text-gray-500 truncate mt-0.5">
                     {b.tone || "Sem tom definido"}
                   </p>
                 </div>
@@ -104,27 +104,29 @@ export default function Chat() {
         </ul>
       </aside>
       <main className="flex-1 flex flex-col">
-        <header className="p-4 bg-[#075E54] text-white flex items-center gap-3">
+        <header className="p-3 bg-[#075E54] text-white flex items-center gap-3 shadow-sm">
           <Link to="/" className="text-white text-lg" aria-label="Voltar">
-            &#8592;
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+            </svg>
           </Link>
           {loadingBot && <p className="text-sm text-green-200">Carregando...</p>}
           {notFound && <p className="text-sm text-red-200">Bot não encontrado</p>}
           {bot && (
             <>
-              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold shrink-0">
+              <div className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center text-white font-bold shrink-0">
                 {bot.name[0]}
               </div>
-              <div className="min-w-0">
-                <h1 className="text-lg font-semibold truncate">{bot.name}</h1>
-                <p className="text-xs text-green-200">
-                  {bot.tone || "Sem tom definido"}
+              <div className="min-w-0 flex-1">
+                <h1 className="text-base font-semibold truncate">{bot.name}</h1>
+                <p className="text-xs text-green-200 truncate">
+                  {bot.tone || "online"}
                 </p>
               </div>
             </>
           )}
         </header>
-        <section className="flex-1 overflow-y-auto p-4 bg-[#ECE5DD] space-y-1">
+        <section className="flex-1 overflow-y-auto bg-[#ECE5DD] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDUwIDkwIj48cGF0aCBkPSJNMjUgNjBhMjUgMjUgMCAwMSAwIDUwIDI1IDI1IDAgMDIwIC01MHoiIGZpbGw9InJnYmEoMCwwLDAsMC4wMykiLz48L3N2Zz4=')] bg-repeat py-2">
           {notFound && (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500">Bot não encontrado. Selecione outro bot.</p>
@@ -134,9 +136,13 @@ export default function Chat() {
             <MessageBubble key={msg.id} {...msg} />
           ))}
           {loading && (
-            <div className="flex justify-start my-1">
-              <div className="bg-white rounded-2xl p-3 shadow-sm">
-                <p className="text-gray-500 text-sm">digitando...</p>
+            <div className="flex justify-start my-1 px-4">
+              <div className="bg-white rounded-2xl rounded-bl-sm px-3 py-2 shadow-sm">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
               </div>
             </div>
           )}
