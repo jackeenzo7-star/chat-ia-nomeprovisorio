@@ -79,7 +79,12 @@ export default function Chat() {
   return (
     <div className="flex h-screen bg-[#ECE5DD]">
       <aside className="hidden md:flex w-1/3 border-r border-gray-300 bg-white flex-col">
-        <div className="p-4 bg-[#075E54] text-white font-semibold text-lg">Bots</div>
+        <div className="p-4 bg-[#075E54] text-white font-semibold text-lg flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z" />
+          </svg>
+          <span>Bots</span>
+        </div>
         <ul className="flex-1 overflow-y-auto bg-white">
           {bots.map((b) => (
             <li

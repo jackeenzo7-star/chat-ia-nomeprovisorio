@@ -72,33 +72,45 @@ export default function BotCreate() {
     }`;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h1 className="text-2xl font-bold mb-1 text-gray-800">Criar Bot</h1>
-          <p className="text-sm text-gray-500 mb-6">Defina a personalidade do seu assistente</p>
+    <div className="min-h-screen bg-[#ECE5DD] p-3 md:p-4">
+      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3 mb-1">
+            <button onClick={() => navigate("/")} className="md:hidden text-gray-600 p-1" aria-label="Voltar">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-800">Criar Bot</h1>
+              <p className="text-xs md:text-sm text-gray-500">Defina a personalidade do seu assistente</p>
+            </div>
+          </div>
 
           {success && (
-            <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg mb-4 text-sm font-medium">
+            <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg mb-4 text-sm font-medium" role="alert">
               Bot criado com sucesso! Redirecionando...
             </div>
           )}
 
-          {!success && <form onSubmit={handleSubmit} className="space-y-4">
+          {!success && <form onSubmit={handleSubmit} className="space-y-4 mt-4" noValidate>
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Nome do bot")}>Nome *</label>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" htmlFor="name" {...tip("Nome do bot")}>Nome *</label>
               <input
+                id="name"
                 placeholder="Ex: Assistente Virtual"
                 value={form.name}
                 onChange={set("name")}
                 className={inputClass("name")}
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
               />
-              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+              {errors.name && <p id="name-error" className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Gênero percebido do bot")}>Gênero</label>
-              <select value={form.gender} onChange={set("gender")} className={inputClass("gender")}>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" htmlFor="gender" {...tip("Gênero percebido do bot")}>Gênero</label>
+              <select id="gender" value={form.gender} onChange={set("gender")} className={inputClass("gender")}>
                 <option value="neutro">Neutro</option>
                 <option value="masculino">Masculino</option>
                 <option value="feminino">Feminino</option>
@@ -106,70 +118,82 @@ export default function BotCreate() {
             </div>
 
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" {...tip("Tom da comunicação do bot")}>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" htmlFor="tone" {...tip("Tom da comunicação do bot")}>
                 <span>Tom {form.tone.trim().length >= MIN.TONE ? "✅" : `(${form.tone.trim().length}/${MIN.TONE})`}</span>
                 <span className={form.tone.trim().length >= MIN.TONE ? "text-green-500" : "text-red-400"}>{MIN.TONE} mín.</span>
               </label>
               <textarea
+                id="tone"
                 placeholder="Descreva como o bot deve se expressar (ex: caloroso, direto, poético...)"
                 value={form.tone}
                 onChange={set("tone")}
                 className={inputClass("tone")}
                 rows={4}
+                aria-invalid={!!errors.tone}
+                aria-describedby={errors.tone ? "tone-error" : undefined}
               />
-              {errors.tone && <p className="text-red-500 text-xs mt-1">{errors.tone}</p>}
+              {errors.tone && <p id="tone-error" className="text-red-500 text-xs mt-1">{errors.tone}</p>}
             </div>
 
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" {...tip("Estilo de comportamento do bot")}>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" htmlFor="style" {...tip("Estilo de comportamento do bot")}>
                 <span>Estilo {form.language_style.trim().length >= MIN.STYLE ? "✅" : `(${form.language_style.trim().length}/${MIN.STYLE})`}</span>
                 <span className={form.language_style.trim().length >= MIN.STYLE ? "text-green-500" : "text-red-400"}>{MIN.STYLE} mín.</span>
               </label>
               <textarea
+                id="style"
                 placeholder="Descreva o estilo comportamental do bot (ex: paciente, didático, provocador...)"
                 value={form.language_style}
                 onChange={set("language_style")}
                 className={inputClass("language_style")}
                 rows={6}
+                aria-invalid={!!errors.language_style}
+                aria-describedby={errors.language_style ? "style-error" : undefined}
               />
-              {errors.language_style && <p className="text-red-500 text-xs mt-1">{errors.language_style}</p>}
+              {errors.language_style && <p id="style-error" className="text-red-500 text-xs mt-1">{errors.language_style}</p>}
             </div>
 
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" {...tip("História de fundo que define a personalidade do bot")}>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" htmlFor="story" {...tip("História de fundo que define a personalidade do bot")}>
                 <span>História {form.backstory.trim().length >= MIN.STORY ? "✅" : `(${form.backstory.trim().length}/${MIN.STORY})`}</span>
                 <span className={form.backstory.trim().length >= MIN.STORY ? "text-green-500" : "text-red-400"}>{MIN.STORY} mín.</span>
               </label>
               <textarea
+                id="story"
                 placeholder="Conte a história do bot: origem, experiências, personalidade..."
                 value={form.backstory}
                 onChange={set("backstory")}
                 className={inputClass("backstory")}
                 rows={8}
+                aria-invalid={!!errors.backstory}
+                aria-describedby={errors.backstory ? "story-error" : undefined}
               />
-              {errors.backstory && <p className="text-red-500 text-xs mt-1">{errors.backstory}</p>}
+              {errors.backstory && <p id="story-error" className="text-red-500 text-xs mt-1">{errors.backstory}</p>}
             </div>
 
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Mensagem que o bot envia ao iniciar uma conversa")}>Saudação inicial *</label>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" htmlFor="greeting" {...tip("Mensagem que o bot envia ao iniciar uma conversa")}>Saudação inicial *</label>
               <input
+                id="greeting"
                 placeholder="Olá! Como posso ajudar?"
                 value={form.initial_greeting}
                 onChange={set("initial_greeting")}
                 className={inputClass("initial_greeting")}
+                aria-invalid={!!errors.initial_greeting}
+                aria-describedby={errors.initial_greeting ? "greeting-error" : undefined}
               />
-              {errors.initial_greeting && <p className="text-red-500 text-xs mt-1">{errors.initial_greeting}</p>}
+              {errors.initial_greeting && <p id="greeting-error" className="text-red-500 text-xs mt-1">{errors.initial_greeting}</p>}
             </div>
 
             <div className="flex gap-2 pt-2">
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-[#075E54] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#054d44] disabled:opacity-40 transition-colors"
+                className="flex-1 md:flex-none bg-[#075E54] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#054d44] disabled:opacity-40 transition-colors"
               >
                 {saving ? "Salvando..." : "Criar Bot"}
               </button>
-              <button type="button" onClick={() => navigate("/")} className="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <button type="button" onClick={() => navigate("/")} className="hidden md:inline-block border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors">
                 Cancelar
               </button>
             </div>

@@ -11,7 +11,7 @@ const MessageBubble: React.FC<Message> = ({ text, fromUser, timestamp }) => {
 
   return (
     <div className={`flex ${align} my-1 px-4`}>
-      <div className={`relative max-w-xs ${fromUser ? "order-1" : "order-2"}`}>
+      <div className={`relative max-w-[85%] md:max-w-xs ${fromUser ? "order-1" : "order-2"}`}>
         <div
           className={`
             px-3 py-2 shadow-sm break-words text-[14px] leading-[1.4]
