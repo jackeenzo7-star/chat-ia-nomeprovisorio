@@ -1,4 +1,3 @@
-import json
 from unittest.mock import patch
 from app.main import app
 
@@ -40,3 +39,40 @@ def test_chat_default_prompt(mock_ask_ai):
     args, _ = mock_ask_ai.call_args
     assert args[0] == "teste"
     assert "assistente amigável" in args[1]
+
+
+def test_chat_missing_body():
+    with app.test_client() as client:
+        response = client.post("/chat", content_type="application/json", data="{}")
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Campo 'user_message' é obrigatório"}
+
+
+def test_chat_no_json():
+    with app.test_client() as client:
+        response = client.post("/chat")
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Campo 'user_message' é obrigatório"}
+
+
+@patch("app.main.ask_ai")
+def test_chat_empty_message(mock_ask_ai):
+    with app.test_client() as client:
+        response = client.post("/chat", json={"user_message": ""})
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "'user_message' não pode ser vazio"}
+    mock_ask_ai.assert_not_called()
+
+
+@patch("app.main.ask_ai")
+def test_chat_ai_error(mock_ask_ai):
+    mock_ask_ai.side_effect = Exception("API key inválida")
+
+    with app.test_client() as client:
+        response = client.post("/chat", json={"user_message": "Oi"})
+
+    assert response.status_code == 500
+    assert response.get_json() == {"error": "Erro ao processar a mensagem"}

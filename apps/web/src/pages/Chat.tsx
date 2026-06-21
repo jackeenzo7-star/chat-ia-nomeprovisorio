@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import MessageBubble from "../components/MessageBubble";
 import ChatInput from "../components/ChatInput";
@@ -14,16 +14,26 @@ export default function Chat() {
   const [bots, setBots] = useState<Bot[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingBot, setLoadingBot] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const msgId = useRef(0);
 
   useEffect(() => {
     if (!id) return;
+    setLoadingBot(true);
+    setNotFound(false);
+    setMessages([]);
+    setBot(null);
     getBot(id).then((found) => {
-      setBot(found);
-      if (found) {
-        setMessages([
-          { id: "0", text: found.initial_greeting, fromUser: false },
-        ]);
+      setLoadingBot(false);
+      if (!found) {
+        setNotFound(true);
+        return;
       }
+      setBot(found);
+      setMessages([
+        { id: String(++msgId.current), text: found.initial_greeting, fromUser: false },
+      ]);
     });
     listBots().then(setBots);
   }, [id]);
@@ -31,7 +41,7 @@ export default function Chat() {
   const handleSend = async (text: string) => {
     if (!bot) return;
     const userMsg: Message = {
-      id: Date.now().toString(),
+      id: String(++msgId.current),
       text,
       fromUser: true,
     };
@@ -41,7 +51,7 @@ export default function Chat() {
     try {
       const data = await askIA(text, buildPrompt(bot));
       const iaMsg: Message = {
-        id: (Date.now() + 1).toString(),
+        id: String(++msgId.current),
         text: data.response,
         fromUser: false,
       };
@@ -51,7 +61,7 @@ export default function Chat() {
       setMessages((prev) => [
         ...prev,
         {
-          id: (Date.now() + 1).toString(),
+          id: String(++msgId.current),
           text: "Erro ao conectar com a IA.",
           fromUser: false,
         },
@@ -63,7 +73,7 @@ export default function Chat() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <aside className="w-1/3 border-r border-gray-300 bg-white flex flex-col">
+      <aside className="hidden md:flex w-1/3 border-r border-gray-300 bg-white flex flex-col">
         <div className="p-4 text-lg font-semibold border-b">Bots</div>
         <ul className="divide-y flex-1 overflow-y-auto">
           {bots.map((b) => (
@@ -94,16 +104,18 @@ export default function Chat() {
       </aside>
       <main className="flex-1 flex flex-col">
         <header className="p-4 bg-[#075E54] text-white flex items-center gap-3">
-          <Link to="/" className="text-white text-lg">
+          <Link to="/" className="text-white text-lg" aria-label="Voltar">
             &#8592;
           </Link>
+          {loadingBot && <p className="text-sm text-green-200">Carregando...</p>}
+          {notFound && <p className="text-sm text-red-200">Bot não encontrado</p>}
           {bot && (
             <>
-              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold shrink-0">
                 {bot.name[0]}
               </div>
-              <div>
-                <h1 className="text-lg font-semibold">{bot.name}</h1>
+              <div className="min-w-0">
+                <h1 className="text-lg font-semibold truncate">{bot.name}</h1>
                 <p className="text-xs text-green-200">
                   {bot.tone === "friendly"
                     ? "Amigável"
@@ -116,7 +128,12 @@ export default function Chat() {
           )}
         </header>
         <section className="flex-1 overflow-y-auto p-4 bg-[#ECE5DD] space-y-1">
-          {messages.map((msg) => (
+          {notFound && (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500">Bot não encontrado. Selecione outro bot.</p>
+            </div>
+          )}
+          {!notFound && messages.map((msg) => (
             <MessageBubble key={msg.id} {...msg} />
           ))}
           {loading && (
@@ -127,7 +144,7 @@ export default function Chat() {
             </div>
           )}
         </section>
-        <ChatInput onSend={handleSend} disabled={!bot} />
+        <ChatInput onSend={handleSend} disabled={!bot || notFound || loadingBot} />
       </main>
     </div>
   );

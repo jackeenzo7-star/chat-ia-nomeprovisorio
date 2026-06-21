@@ -18,7 +18,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <aside className="w-1/3 border-r border-gray-300 bg-white flex flex-col">
+      <aside className="w-full md:w-1/3 border-r border-gray-300 bg-white flex flex-col">
         <div className="p-4 text-lg font-semibold border-b flex justify-between items-center">
           <span>Bots</span>
           <span className="text-xs text-gray-400">{user}</span>
@@ -52,7 +52,7 @@ export default function Home() {
           )}
         </ul>
       </aside>
-      <main className="flex-1 flex flex-col items-center justify-center bg-[#ECE5DD] text-gray-500">
+      <main className="hidden md:flex flex-1 flex-col items-center justify-center bg-[#ECE5DD] text-gray-500">
         <p className="text-lg">Selecione ou crie um bot para começar</p>
       </main>
     </div>

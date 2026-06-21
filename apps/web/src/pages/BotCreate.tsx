@@ -1,29 +1,51 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBot } from "../services/bots";
+import { createBot, listBots } from "../services/bots";
 import BotPreview from "../components/BotPreview";
+import type { Bot } from "../types/bot";
 
 const tip = (text: string) => ({ title: text });
 
+function validate(form: typeof defaultForm, existingNames: string[]): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!form.name.trim()) errors.name = "O nome é obrigatório.";
+  else if (form.name.trim().length < 2) errors.name = "O nome deve ter pelo menos 2 caracteres.";
+  else if (existingNames.includes(form.name.trim().toLowerCase())) errors.name = "Já existe um bot com este nome.";
+  if (!form.initial_greeting.trim()) errors.initial_greeting = "A saudação inicial é obrigatória.";
+  return errors;
+}
+
+const defaultForm = {
+  name: "",
+  gender: "neutro",
+  backstory: "",
+  language_style: "informal" as const,
+  tone: "friendly" as const,
+  initial_greeting: "Olá! Como posso ajudar?",
+};
+
 export default function BotCreate() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: "",
-    gender: "neutro",
-    backstory: "",
-    language_style: "informal" as const,
-    tone: "friendly" as const,
-    initial_greeting: "Olá! Como posso ajudar?",
-  });
+  const [form, setForm] = useState(defaultForm);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [existingNames, setExistingNames] = useState<string[]>([]);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    listBots().then((bots) => setExistingNames(bots.map((b: Bot) => b.name.toLowerCase())));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) return;
+    const errs = validate(form, existingNames);
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     setSaving(true);
     try {
       await createBot(form);
-      navigate("/");
+      setSuccess(true);
+      setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       console.error(err);
       alert("Erro ao criar bot");
@@ -34,7 +56,15 @@ export default function BotCreate() {
 
   const set = (field: string) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  ) => {
+    setForm((f) => ({ ...f, [field]: e.target.value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const inputClass = (field: string) =>
+    `w-full p-3 border rounded-lg outline-none transition-colors focus:ring-2 focus:ring-[#075E54] focus:border-transparent ${
+      errors[field] ? "border-red-400 bg-red-50" : "border-gray-300"
+    }`;
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -43,21 +73,27 @@ export default function BotCreate() {
           <h1 className="text-2xl font-bold mb-1 text-gray-800">Criar Bot</h1>
           <p className="text-sm text-gray-500 mb-6">Defina a personalidade do seu assistente</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {success && (
+            <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg mb-4 text-sm font-medium">
+              Bot criado com sucesso! Redirecionando...
+            </div>
+          )}
+
+          {!success && <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Nome do bot")}>Nome *</label>
               <input
                 placeholder="Ex: Assistente Virtual"
                 value={form.name}
                 onChange={set("name")}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#075E54] focus:border-transparent outline-none"
-                required
+                className={inputClass("name")}
               />
+              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 
             <div>
               <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Gênero percebido do bot")}>Gênero</label>
-              <select value={form.gender} onChange={set("gender")} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#075E54] outline-none">
+              <select value={form.gender} onChange={set("gender")} className={inputClass("gender")}>
                 <option value="neutro">Neutro</option>
                 <option value="masculino">Masculino</option>
                 <option value="feminino">Feminino</option>
@@ -66,7 +102,7 @@ export default function BotCreate() {
 
             <div>
               <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Tom emocional das respostas")}>Tom</label>
-              <select value={form.tone} onChange={set("tone")} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#075E54] outline-none">
+              <select value={form.tone} onChange={set("tone")} className={inputClass("tone")}>
                 <option value="friendly">Amigável</option>
                 <option value="serious">Sério</option>
                 <option value="funny">Engraçado</option>
@@ -75,7 +111,7 @@ export default function BotCreate() {
 
             <div>
               <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Nível de formalidade da linguagem")}>Estilo</label>
-              <select value={form.language_style} onChange={set("language_style")} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#075E54] outline-none">
+              <select value={form.language_style} onChange={set("language_style")} className={inputClass("language_style")}>
                 <option value="informal">Informal</option>
                 <option value="formal">Formal</option>
               </select>
@@ -87,25 +123,26 @@ export default function BotCreate() {
                 placeholder="Ex: Nasci em uma cidade pequena e sempre gostei de ajudar pessoas..."
                 value={form.backstory}
                 onChange={set("backstory")}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#075E54] focus:border-transparent outline-none"
+                className={inputClass("backstory")}
                 rows={3}
               />
             </div>
 
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Mensagem que o bot envia ao iniciar uma conversa")}>Saudação inicial</label>
+              <label className="block text-xs text-gray-400 uppercase font-semibold mb-1" {...tip("Mensagem que o bot envia ao iniciar uma conversa")}>Saudação inicial *</label>
               <input
                 placeholder="Olá! Como posso ajudar?"
                 value={form.initial_greeting}
                 onChange={set("initial_greeting")}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#075E54] focus:border-transparent outline-none"
+                className={inputClass("initial_greeting")}
               />
+              {errors.initial_greeting && <p className="text-red-500 text-xs mt-1">{errors.initial_greeting}</p>}
             </div>
 
             <div className="flex gap-2 pt-2">
               <button
                 type="submit"
-                disabled={saving || !form.name.trim()}
+                disabled={saving}
                 className="bg-[#075E54] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#054d44] disabled:opacity-40 transition-colors"
               >
                 {saving ? "Salvando..." : "Criar Bot"}
@@ -114,7 +151,7 @@ export default function BotCreate() {
                 Cancelar
               </button>
             </div>
-          </form>
+          </form>}
         </div>
 
         <div className="md:pt-16">
