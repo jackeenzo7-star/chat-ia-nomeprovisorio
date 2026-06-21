@@ -1,35 +1,23 @@
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from .ai import ask_ai
 
-app = FastAPI(
-    title="Chat IA – Backend",
-    version="0.1.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = Flask(__name__)
+CORS(app)
 
 
-@app.get("/ping")
-async def ping():
-    return {"msg": "pong"}
+@app.route("/ping")
+def ping():
+    return jsonify({"msg": "pong"})
 
 
-@app.post("/chat")
-async def chat(request: Request):
-    body = await request.json()
+@app.route("/chat", methods=["POST"])
+def chat():
+    body = request.get_json()
     user_message = body["user_message"]
     character_prompt = body.get(
         "character_prompt",
         "Você é um assistente amigável e prestativo. Responda de forma natural e concisa."
     )
     response = ask_ai(user_message, character_prompt)
-    return {"response": response}
+    return jsonify({"response": response})
