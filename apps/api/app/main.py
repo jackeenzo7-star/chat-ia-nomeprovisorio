@@ -64,8 +64,9 @@ def chat():
         "character_prompt",
         "Você é um assistente amigável e prestativo. Responda de forma natural e concisa."
     )
+    history = body.get("history", [])
     try:
-        response = ask_ai(user_message, character_prompt)
+        response = ask_ai(user_message, character_prompt, history)
     except Exception:
         return jsonify({"error": "Erro ao processar a mensagem"}), 500
     return jsonify({"response": response})

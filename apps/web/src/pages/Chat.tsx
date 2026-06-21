@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import MessageBubble from "../components/MessageBubble";
 import ChatInput from "../components/ChatInput";
 import { askIA } from "../services/ia";
+import type { MessageInput } from "../services/ia";
 import { getBot, listBots } from "../services/bots";
 import { buildPrompt } from "../types/bot";
 import type { Bot } from "../types/bot";
@@ -48,8 +49,12 @@ export default function Chat() {
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
 
+    const history: MessageInput[] = messages
+      .slice(-10)
+      .map((m) => ({ role: m.fromUser ? "user" : "assistant", content: m.text }));
+
     try {
-      const data = await askIA(text, buildPrompt(bot));
+      const data = await askIA(text, buildPrompt(bot), history);
       const iaMsg: Message = {
         id: String(++msgId.current),
         text: data.response,

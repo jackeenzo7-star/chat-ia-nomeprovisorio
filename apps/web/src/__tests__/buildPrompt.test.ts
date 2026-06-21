@@ -24,7 +24,7 @@ describe("buildPrompt", () => {
   });
 
   it("inclui o estilo como texto livre", () => {
-    expect(buildPrompt({ ...base, language_style: "formal e direto" })).toContain("Estilo de linguagem: formal e direto");
+    expect(buildPrompt({ ...base, language_style: "formal e direto" })).toContain("Estilo: formal e direto");
   });
 
   it("inclui backstory quando fornecida", () => {
@@ -44,6 +44,11 @@ describe("buildPrompt", () => {
 
   it("não inclui estilo vazio", () => {
     const r = buildPrompt({ ...base, language_style: "" });
-    expect(r).not.toContain("Estilo de linguagem:");
+    expect(r).not.toContain("Estilo:");
+  });
+
+  it("inclui regras de comportamento", () => {
+    expect(buildPrompt(base)).toContain("## Regras de comportamento");
+    expect(buildPrompt(base)).toContain("Responda como um humano conversando no WhatsApp");
   });
 });

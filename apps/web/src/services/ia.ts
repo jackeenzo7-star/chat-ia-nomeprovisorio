@@ -1,8 +1,14 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
+export interface MessageInput {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export const askIA = async (
   userMessage: string,
-  characterPrompt?: string
+  characterPrompt?: string,
+  history?: MessageInput[]
 ) => {
   const url = BASE_URL ? `${BASE_URL}/chat` : "/api/chat";
   const res = await fetch(url, {
@@ -11,6 +17,7 @@ export const askIA = async (
     body: JSON.stringify({
       user_message: userMessage,
       character_prompt: characterPrompt,
+      history,
     }),
   });
   if (!res.ok) {

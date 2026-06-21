@@ -24,7 +24,31 @@ def test_chat(mock_ask_ai):
 
     assert response.status_code == 200
     assert response.get_json() == {"response": "Olá! Como posso ajudar?"}
-    mock_ask_ai.assert_called_once_with("Oi", "Você é um bot amigável.")
+    mock_ask_ai.assert_called_once_with("Oi", "Você é um bot amigável.", [])
+
+
+@patch("app.main.ask_ai")
+def test_chat_with_history(mock_ask_ai):
+    mock_ask_ai.return_value = "Legal!"
+
+    with app.test_client() as client:
+        response = client.post(
+            "/chat",
+            json={
+                "user_message": "Tudo bem?",
+                "character_prompt": "Seja amigável.",
+                "history": [
+                    {"role": "user", "content": "Oi"},
+                    {"role": "assistant", "content": "Olá!"},
+                ],
+            },
+        )
+
+    assert response.status_code == 200
+    mock_ask_ai.assert_called_once_with(
+        "Tudo bem?", "Seja amigável.",
+        [{"role": "user", "content": "Oi"}, {"role": "assistant", "content": "Olá!"}],
+    )
 
 
 @patch("app.main.ask_ai")

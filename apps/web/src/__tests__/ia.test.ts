@@ -1,27 +1,31 @@
-let BASE_URL = "";
+jest.mock("../services/ia", () => {
+  let baseUrl = "";
+  return {
+    __esModule: true,
+    setBaseUrl: (url: string) => { baseUrl = url; },
+    askIA: jest.fn(
+      async (userMessage: string, characterPrompt?: string, history?: unknown[]) => {
+        const url = baseUrl ? `${baseUrl}/chat` : "/api/chat";
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_message: userMessage,
+            character_prompt: characterPrompt,
+            history,
+          }),
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Erro ${res.status}: ${text}`);
+        }
+        return res.json();
+      },
+    ),
+  };
+});
 
-jest.mock("../services/ia", () => ({
-  askIA: jest.fn(
-    async (userMessage: string, characterPrompt?: string) => {
-      const url = BASE_URL ? `${BASE_URL}/chat` : "/api/chat";
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_message: userMessage,
-          character_prompt: characterPrompt,
-        }),
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Erro ${res.status}: ${text}`);
-      }
-      return res.json();
-    },
-  ),
-}));
-
-const { askIA } = jest.requireMock("../services/ia") as { askIA: typeof import("../services/ia").askIA };
+const { askIA, setBaseUrl } = jest.requireMock("../services/ia") as { askIA: typeof import("../services/ia").askIA; setBaseUrl: (url: string) => void };
 
 function mockFetch(status: number, body: unknown) {
   globalThis.fetch = jest.fn().mockResolvedValue({
@@ -33,13 +37,13 @@ function mockFetch(status: number, body: unknown) {
 }
 
 beforeEach(() => {
-  BASE_URL = "";
+  setBaseUrl("");
   jest.clearAllMocks();
 });
 
 describe("askIA", () => {
   it("usa /api/chat quando VITE_API_URL está vazio", async () => {
-    BASE_URL = "";
+    setBaseUrl("");
     mockFetch(200, { response: "Olá!" });
     const result = await askIA("Oi");
     expect(result).toEqual({ response: "Olá!" });
@@ -50,7 +54,7 @@ describe("askIA", () => {
   });
 
   it("usa VITE_API_URL como base quando configurado", async () => {
-    BASE_URL = "https://api.example.com";
+    setBaseUrl("https://api.example.com");
     mockFetch(200, { response: "Resposta" });
     const result = await askIA("teste", "prompt");
     expect(result).toEqual({ response: "Resposta" });
@@ -60,23 +64,25 @@ describe("askIA", () => {
     );
   });
 
-  it("envia user_message e character_prompt no body", async () => {
+  it("envia user_message, character_prompt e history no body", async () => {
     mockFetch(200, { response: "Resposta" });
-    await askIA("Minha mensagem", "Meu prompt");
+    await askIA("Minha mensagem", "Meu prompt", [{ role: "assistant", content: "Oi" }]);
     const callArgs = (globalThis.fetch as jest.Mock).mock.calls[0];
     const body = JSON.parse(callArgs[1].body);
     expect(body).toEqual({
       user_message: "Minha mensagem",
       character_prompt: "Meu prompt",
+      history: [{ role: "assistant", content: "Oi" }],
     });
   });
 
-  it("envia sem character_prompt quando não fornecido", async () => {
+  it("envia sem character_prompt e history quando não fornecidos", async () => {
     mockFetch(200, { response: "Resposta" });
     await askIA("Oi");
     const callArgs = (globalThis.fetch as jest.Mock).mock.calls[0];
     const body = JSON.parse(callArgs[1].body);
     expect(body.character_prompt).toBeUndefined();
+    expect(body.history).toBeUndefined();
   });
 
   it("lança erro quando servidor retorna erro", async () => {
