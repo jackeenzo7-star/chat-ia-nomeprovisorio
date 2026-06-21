@@ -21,9 +21,12 @@ export async function listBots(): Promise<Bot[]> {
 export async function createBot(
   bot: Omit<Bot, "id" | "user_id" | "created_at" | "updated_at">
 ) {
+  const { data: userData } = await supabase.auth.getUser();
+  const user_id = userData?.user?.id;
+  if (!user_id) throw new Error("Usuário não autenticado");
   const { data, error } = await supabase
     .from("bots")
-    .insert(bot)
+    .insert({ ...bot, user_id })
     .select()
     .single();
   if (error) throw error;

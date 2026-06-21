@@ -37,12 +37,16 @@ function makeBuilder(data?: Record<string, unknown>) {
 }
 
 jest.mock("../lib/supabase", () => ({
-  supabase: { from: jest.fn() },
+  supabase: {
+    from: jest.fn(),
+    auth: { getUser: jest.fn() },
+  },
 }));
 
 beforeEach(() => {
-  builder = makeBuilder();
   const supabase = jest.requireMock("../lib/supabase").supabase;
+  supabase.auth.getUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+  builder = makeBuilder();
   supabase.from.mockReturnValue(builder);
 });
 
