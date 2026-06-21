@@ -4,7 +4,11 @@ import { createBot, listBots } from "../services/bots";
 import BotPreview from "../components/BotPreview";
 import type { Bot } from "../types/bot";
 
-const MIN = { TONE: 200, STYLE: 5000, STORY: 10000 } as const;
+const LIMITS = {
+  TONE: { MIN: 50, MAX: 200 },
+  STYLE: { MIN: 2000, MAX: 5000 },
+  STORY: { MIN: 1000, MAX: 10000 },
+} as const;
 
 const tip = (text: string) => ({ title: text });
 
@@ -14,9 +18,15 @@ function validate(form: typeof defaultForm, existingNames: string[]): Record<str
   else if (form.name.trim().length < 2) errors.name = "O nome deve ter pelo menos 2 caracteres.";
   else if (existingNames.includes(form.name.trim().toLowerCase())) errors.name = "Já existe um bot com este nome.";
   if (!form.initial_greeting.trim()) errors.initial_greeting = "A saudação inicial é obrigatória.";
-  if (form.tone.trim().length < MIN.TONE) errors.tone = `O tom deve ter pelo menos ${MIN.TONE} caracteres (${form.tone.trim().length}/${MIN.TONE}).`;
-  if (form.language_style.trim().length < MIN.STYLE) errors.language_style = `O estilo deve ter pelo menos ${MIN.STYLE} caracteres (${form.language_style.trim().length}/${MIN.STYLE}).`;
-  if (form.backstory.trim().length < MIN.STORY) errors.backstory = `A história deve ter pelo menos ${MIN.STORY} caracteres (${form.backstory.trim().length}/${MIN.STORY}).`;
+  const toneLen = form.tone.trim().length;
+  if (toneLen < LIMITS.TONE.MIN) errors.tone = `O tom deve ter pelo menos ${LIMITS.TONE.MIN} caracteres (${toneLen}/${LIMITS.TONE.MIN}).`;
+  else if (toneLen > LIMITS.TONE.MAX) errors.tone = `O tom deve ter no máximo ${LIMITS.TONE.MAX} caracteres (${toneLen}/${LIMITS.TONE.MAX}).`;
+  const styleLen = form.language_style.trim().length;
+  if (styleLen < LIMITS.STYLE.MIN) errors.language_style = `O estilo deve ter pelo menos ${LIMITS.STYLE.MIN} caracteres (${styleLen}/${LIMITS.STYLE.MIN}).`;
+  else if (styleLen > LIMITS.STYLE.MAX) errors.language_style = `O estilo deve ter no máximo ${LIMITS.STYLE.MAX} caracteres (${styleLen}/${LIMITS.STYLE.MAX}).`;
+  const storyLen = form.backstory.trim().length;
+  if (storyLen < LIMITS.STORY.MIN) errors.backstory = `A história deve ter pelo menos ${LIMITS.STORY.MIN} caracteres (${storyLen}/${LIMITS.STORY.MIN}).`;
+  else if (storyLen > LIMITS.STORY.MAX) errors.backstory = `A história deve ter no máximo ${LIMITS.STORY.MAX} caracteres (${storyLen}/${LIMITS.STORY.MAX}).`;
   return errors;
 }
 
@@ -119,8 +129,8 @@ export default function BotCreate() {
 
             <div>
               <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" htmlFor="tone" {...tip("Tom da comunicação do bot")}>
-                <span>Tom {form.tone.trim().length >= MIN.TONE ? "✅" : `(${form.tone.trim().length}/${MIN.TONE})`}</span>
-                <span className={form.tone.trim().length >= MIN.TONE ? "text-green-500" : "text-red-400"}>{MIN.TONE} mín.</span>
+                <span>Tom {form.tone.trim().length >= LIMITS.TONE.MIN && form.tone.trim().length <= LIMITS.TONE.MAX ? "✅" : `(${form.tone.trim().length}/${LIMITS.TONE.MIN})`}</span>
+                <span className={form.tone.trim().length >= LIMITS.TONE.MIN && form.tone.trim().length <= LIMITS.TONE.MAX ? "text-green-500" : "text-red-400"}>{LIMITS.TONE.MIN}-{LIMITS.TONE.MAX}</span>
               </label>
               <textarea
                 id="tone"
@@ -129,6 +139,7 @@ export default function BotCreate() {
                 onChange={set("tone")}
                 className={inputClass("tone")}
                 rows={4}
+                maxLength={LIMITS.TONE.MAX}
                 aria-invalid={!!errors.tone}
                 aria-describedby={errors.tone ? "tone-error" : undefined}
               />
@@ -137,8 +148,8 @@ export default function BotCreate() {
 
             <div>
               <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" htmlFor="style" {...tip("Estilo de comportamento do bot")}>
-                <span>Estilo {form.language_style.trim().length >= MIN.STYLE ? "✅" : `(${form.language_style.trim().length}/${MIN.STYLE})`}</span>
-                <span className={form.language_style.trim().length >= MIN.STYLE ? "text-green-500" : "text-red-400"}>{MIN.STYLE} mín.</span>
+                <span>Estilo {form.language_style.trim().length >= LIMITS.STYLE.MIN && form.language_style.trim().length <= LIMITS.STYLE.MAX ? "✅" : `(${form.language_style.trim().length}/${LIMITS.STYLE.MIN})`}</span>
+                <span className={form.language_style.trim().length >= LIMITS.STYLE.MIN && form.language_style.trim().length <= LIMITS.STYLE.MAX ? "text-green-500" : "text-red-400"}>{LIMITS.STYLE.MIN}-{LIMITS.STYLE.MAX}</span>
               </label>
               <textarea
                 id="style"
@@ -147,6 +158,7 @@ export default function BotCreate() {
                 onChange={set("language_style")}
                 className={inputClass("language_style")}
                 rows={6}
+                maxLength={LIMITS.STYLE.MAX}
                 aria-invalid={!!errors.language_style}
                 aria-describedby={errors.language_style ? "style-error" : undefined}
               />
@@ -155,8 +167,8 @@ export default function BotCreate() {
 
             <div>
               <label className="block text-xs text-gray-400 uppercase font-semibold mb-1 flex justify-between" htmlFor="story" {...tip("História de fundo que define a personalidade do bot")}>
-                <span>História {form.backstory.trim().length >= MIN.STORY ? "✅" : `(${form.backstory.trim().length}/${MIN.STORY})`}</span>
-                <span className={form.backstory.trim().length >= MIN.STORY ? "text-green-500" : "text-red-400"}>{MIN.STORY} mín.</span>
+                <span>História {form.backstory.trim().length >= LIMITS.STORY.MIN && form.backstory.trim().length <= LIMITS.STORY.MAX ? "✅" : `(${form.backstory.trim().length}/${LIMITS.STORY.MIN})`}</span>
+                <span className={form.backstory.trim().length >= LIMITS.STORY.MIN && form.backstory.trim().length <= LIMITS.STORY.MAX ? "text-green-500" : "text-red-400"}>{LIMITS.STORY.MIN}-{LIMITS.STORY.MAX}</span>
               </label>
               <textarea
                 id="story"
@@ -165,6 +177,7 @@ export default function BotCreate() {
                 onChange={set("backstory")}
                 className={inputClass("backstory")}
                 rows={8}
+                maxLength={LIMITS.STORY.MAX}
                 aria-invalid={!!errors.backstory}
                 aria-describedby={errors.backstory ? "story-error" : undefined}
               />

@@ -6,7 +6,7 @@ import BotCreate from "../pages/BotCreate";
 jest.mock("../services/bots", () => ({
   createBot: jest.fn().mockResolvedValue({}),
   listBots: jest.fn().mockResolvedValue([
-    { name: "assistente", id: "1", user_id: "u1", gender: "neutro", backstory: "c".repeat(10000), language_style: "b".repeat(5000), tone: "a".repeat(200), initial_greeting: "Oi", created_at: "", updated_at: "" },
+    { name: "assistente", id: "1", user_id: "u1", gender: "neutro", backstory: "c".repeat(5000), language_style: "b".repeat(3000), tone: "a".repeat(100), initial_greeting: "Oi", created_at: "", updated_at: "" },
   ]),
 }));
 
@@ -86,8 +86,8 @@ describe("BotCreate", () => {
     const tone = screen.getByPlaceholderText(/descreva como o bot deve se expressar/i);
     const style = screen.getByPlaceholderText(/descreva o estilo comportamental/i);
     const story = screen.getByPlaceholderText(/conte a história do bot/i);
-    fireEvent.change(tone, { target: { value: "a".repeat(200) } });
-    fireEvent.change(style, { target: { value: "b".repeat(5000) } });
-    fireEvent.change(story, { target: { value: "c".repeat(10000) } });
+    fireEvent.change(tone, { target: { value: "a".repeat(100) } });
+    fireEvent.change(style, { target: { value: "b".repeat(3000) } });
+    fireEvent.change(story, { target: { value: "c".repeat(5000) } });
   }
 });
